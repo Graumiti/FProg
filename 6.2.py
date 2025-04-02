@@ -1,4 +1,5 @@
 from graphics import *
+from facenew import Face
 import time
 
 
@@ -6,14 +7,13 @@ def main():
     win_width, win_height = 700, 400  # Dimensões da janela
     win = GraphWin("Animação do Círculo", win_width, win_height)
     win.setBackground("white")
-
-    radius = 20
     x, y = win_width // 2, win_height // 2  # Posição inicial do círculo, a meio do ecrã
+    size = 50
+    center = Point(x,y)
     dx, dy = 1, 1  # Velocidade do movimento
 
-    circle = Circle(Point(x, y), radius)
-    circle.setFill("blue")
-    circle.draw(win)
+    circle = Face(win, center, size)
+
 
     while True:
         time.sleep(0.01)  # Controla a velocidade da animação
@@ -23,9 +23,9 @@ def main():
         x, y = center.getX(), center.getY() #conforme o tempo, pega sempre a posição do centro do circulo.
 
         # Verifica a posição do circulo, relativamente a xx e yy e inverte a direção quando toca nos limites da janela
-        if x - radius <= 0 or x + radius >= win_width:
+        if x - size <= 0 or x + size >= win_width:
             dx = -dx
-        if y - radius <= 0 or y + radius >= win_height:
+        if y - size <= 0 or y + size >= win_height:
             dy = -dy
 
         if win.checkMouse():  # Permite encerrar ao clicar na janela
