@@ -1,71 +1,65 @@
 from graphics import *
+import math
 
-class GrupoGrafico:
-    def __init__(self, ancora):
-        self.ancora = Point(ancora.getX(), ancora.getY())  # Clona o ponto
-        self.objetos = [] #aqui serão adicionados todos os componentes gráficos da cara.
+# Classe Esfera, o graphics.py nao consegue desenhar em 3d, entao simulamos um circulo e as suas propriedades no plano R3.
+class Esfera:
+    def __init__(self, raio):
+        self.raio = raio
 
-    def retornaAncora(self):
-        return Point(self.ancora.getX(), self.ancora.getY()) #é como uma "segunda via" do ponto ancora
-    #para que mesmo se o ponto for alterado fora da classe, termos garantia que usamos o original...
+    def getRadius(self):
+        return self.raio
 
-    def adicionaObjeto(self, objeto):
-        self.objetos.append(objeto) #fora da classe, usamo-lo para adicionar todos os objetos feitos...
+    def surfaceArea(self):
+        return 4 * math.pi * self.raio ** 2
 
-    def move(self, dx, dy):
-        self.ancora.move(dx, dy)
-        for objeto in self.objetos:
-            objeto.move(dx, dy) #movimento, a partir de dx, dy
+    def volume(self):
+        return (4 / 3) * math.pi * self.raio ** 3
 
-    def desenha(self, win):
-        for objeto in self.objetos:
-            objeto.draw(win) #desenhar
-
-    def apaga(self):
-        for objeto in self.objetos:
-            objeto.undraw() #apagar
-
-def desenhaCara(grupo):
-    # Cabeça
-    cabeca = Circle(grupo.retornaAncora(), 40)
-    cabeca.setFill("yellow")
-    grupo.adicionaObjeto(cabeca)
-
-    # Olho esquerdo
-    olhoE = Circle(grupo.retornaAncora().clone(), 5)
-    olhoE.move(-15, -10)
-    olhoE.setFill("black")
-    grupo.adicionaObjeto(olhoE)
-
-    # Olho direito
-    olhoD = Circle(grupo.retornaAncora().clone(), 5)
-    olhoD.move(15, -10)
-    olhoD.setFill("black")
-    grupo.adicionaObjeto(olhoD)
-
-    # Boca
-    boca = Line(Point(grupo.retornaAncora().getX() - 15, grupo.retornaAncora().getY() + 10),
-                Point(grupo.retornaAncora().getX() + 15, grupo.retornaAncora().getY() + 10))
-    grupo.adicionaObjeto(boca)
 
 def main():
-    win = GraphWin("Grupo Gráfico - Cara", 400, 400)
+    # Criar janela
+    win = GraphWin("Calculadora de Esfera", 500, 400)
+    win.setBackground("lightblue")
 
-    ancora = Point(200, 200) #definir a posiçao inicial da ancora que produz a cara
-    grupo = GrupoGrafico(ancora) # chamar a classe
-    desenhaCara(grupo)
-    grupo.desenha(win)
+    # Instruções
+    instr = Text(Point(250, 30), "Digite o raio da esfera e clique em qualquer lugar.")
+    instr.draw(win)
 
-    while True:
-        click = win.getMouse()
-        novoX = click.getX()
-        novoY = click.getY()
+    # Caixa de entrada para o raio
+    input_box = Entry(Point(250, 70), 10)
+    input_box.draw(win)
 
-        dx = novoX - grupo.retornaAncora().getX() #definir o dx, dy.
-        dy = novoY - grupo.retornaAncora().getY()
+    # Esperar o clique do usuário
+    win.getMouse()
 
-        grupo.move(dx, dy)
+    try:
+        raio = float(input_box.getText())
+        esfera = Esfera(raio)
 
+        # Desenha a "esfera" como círculo no centro inferior
+        center = Point(250, 280)
+        escalar = 10  # fator de escala para caber na janela
+        raio_pixel = raio * escalar
+
+        if raio_pixel > 100:
+            raio_pixel = 100  # limitar o tamanho visual, para não ultrapassar da janela...
+
+        esfera_circulo = Circle(center, raio_pixel)
+        esfera_circulo.setFill("white")
+        esfera_circulo.setOutline("black")
+        esfera_circulo.draw(win)
+
+        # Textos de resultado
+        Text(Point(250, 130), f"Raio: {esfera.getRadius():.2f}").draw(win)
+        Text(Point(250, 160), f"Área da superfície: {esfera.surfaceArea():.2f}").draw(win)
+        Text(Point(250, 190), f"Volume: {esfera.volume():.2f}").draw(win)
+
+    except ValueError:
+        Text(Point(250, 150), "Por favor, digite um número válido.").draw(win)
+
+    # Mensagem final
+    Text(Point(250, 360), "Clique para sair.").draw(win)
+    win.getMouse()
     win.close()
 
 main()

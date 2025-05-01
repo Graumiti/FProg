@@ -51,7 +51,7 @@ def main():
         return
 
     print("Imagem convertida.")
-    nome_saida = input("Digite o nome do novo arquivo para salvar a imagem modificada (ex: resultado.gif): ")
+    nome_saida = input("Digite o nome do novo arquivo para salvar a imagem modificada (ex: alterado.gif): ")
     imagem.save(nome_saida)
     print(f"Imagem salva como '{nome_saida}'.")
 

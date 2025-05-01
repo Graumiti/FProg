@@ -1,85 +1,70 @@
 from graphics import *
 
-def media(lista):
-    return sum(lista) / len(lista)
+class GrupoGrafico:
+    def __init__(self, ancora):
+        self.ancora = Point(ancora.getX(), ancora.getY())  # Clona o ponto
+        self.objetos = [] #aqui serão adicionados todos os componentes gráficos da cara.
 
-def regressao_linear(xs, ys):
-    n = len(xs)
-    media_x = media(xs)
-    media_y = media(ys)
+    def retornaAncora(self):
+        return Point(self.ancora.getX(), self.ancora.getY()) #é como uma "segunda via" do ponto ancora
+    #para que mesmo se o ponto for alterado fora da classe, termos garantia que usamos o original...
 
-    soma_xy = sum(x*y for x, y in zip(xs, ys))
-    soma_x2 = sum(x**2 for x in xs)
+    def adicionaObjeto(self, objeto):
+        self.objetos.append(objeto) #fora da classe, usamo-lo para adicionar todos os objetos feitos...
 
-    numerador = soma_xy - n * media_x * media_y
-    denominador = soma_x2 - n * media_x**2
+    def move(self, dx, dy):
+        self.ancora.move(dx, dy)
+        for objeto in self.objetos:
+            objeto.move(dx, dy) #movimento, a partir de dx, dy
 
-    m = numerador / denominador if denominador != 0 else 0
-    return media_x, media_y, m
+    def desenha(self, win):
+        for objeto in self.objetos:
+            objeto.draw(win) #desenhar
+
+    def apaga(self):
+        for objeto in self.objetos:
+            objeto.undraw() #apagar
+
+def desenhaCara(grupo):
+    # Cabeça
+    cabeca = Circle(grupo.retornaAncora(), 40)
+    cabeca.setFill("yellow")
+    grupo.adicionaObjeto(cabeca)
+
+    # Olho esquerdo
+    olhoE = Circle(grupo.retornaAncora().clone(), 5)
+    olhoE.move(-15, -10)
+    olhoE.setFill("black")
+    grupo.adicionaObjeto(olhoE)
+
+    # Olho direito
+    olhoD = Circle(grupo.retornaAncora().clone(), 5)
+    olhoD.move(15, -10)
+    olhoD.setFill("black")
+    grupo.adicionaObjeto(olhoD)
+
+    # Boca
+    boca = Line(Point(grupo.retornaAncora().getX() - 15, grupo.retornaAncora().getY() + 10),
+                Point(grupo.retornaAncora().getX() + 15, grupo.retornaAncora().getY() + 10))
+    grupo.adicionaObjeto(boca)
 
 def main():
-    win = GraphWin("Regressão Linear", 600, 600)
-    win.setCoords(0, 0, 100, 100)
+    win = GraphWin("Grupo Gráfico - Cara", 400, 400)
 
-    # Botão "Concluído"
-    botao = Rectangle(Point(0, 0), Point(15, 8))
-    botao.setFill("lightgray")
-    botao.draw(win)
-    txt = Text(Point(7.5, 4), "Concluído")
-    txt.draw(win)
-
-    # Contador de pontos
-    contador = Text(Point(90, 95), "Pontos: 0")
-    contador.setSize(10)
-    contador.draw(win)
-
-    pontos = []
-    xs, ys = [], []
+    ancora = Point(200, 200) #definir a posiçao inicial da ancora que produz a cara
+    grupo = GrupoGrafico(ancora) # chamar a classe
+    desenhaCara(grupo)
+    grupo.desenha(win)
 
     while True:
         click = win.getMouse()
-        x, y = click.getX(), click.getY()
+        novoX = click.getX()
+        novoY = click.getY()
 
-        # Verifica se clicou no botão "Concluído"
-        if 0 <= x <= 15 and 0 <= y <= 8:
-            break
+        dx = novoX - grupo.retornaAncora().getX() #definir o dx, dy.
+        dy = novoY - grupo.retornaAncora().getY()
 
-        # Armazena e desenha ponto
-        Circle(Point(x, y), 1).draw(win)
-        xs.append(x)
-        ys.append(y)
-        pontos.append((x, y))
+        grupo.move(dx, dy)
 
-        contador.setText(f"Pontos: {len(pontos)}")
-
-    if len(pontos) < 2:
-        aviso = Text(Point(50, 50), "Insira pelo menos 2 pontos!")
-        aviso.setFill("red")
-        aviso.setSize(14)
-        aviso.draw(win)
-    else:
-        media_x, media_y, m = regressao_linear(xs, ys)
-
-        # Cálculo da linha nos extremos da janela
-        x_min = 0
-        x_max = 100
-        y_min = media_y + m * (x_min - media_x)
-        y_max = media_y + m * (x_max - media_x)
-
-        # Desenha a linha de regressão
-        linha = Line(Point(x_min, y_min), Point(x_max, y_max))
-        linha.setWidth(2)
-        linha.setOutline("red")
-        linha.draw(win)
-
-        # Mostra equação
-        eq_texto = Text(Point(50, 95), f"y = {media_y:.2f} + {m:.2f}(x - {media_x:.2f})")
-        eq_texto.setTextColor("red")
-        eq_texto.setSize(12)
-        eq_texto.draw(win)
-
-    # Aguarda clique final para fechar
-    win.getMouse()
-    win.close()
 
 main()

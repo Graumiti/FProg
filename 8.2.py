@@ -1,48 +1,52 @@
-from graphics import *
+def ler_dados_teclado():
+    trajetos = []
 
-def converter_para_cinza(imagem):
-    largura = imagem.getWidth()
-    altura = imagem.getHeight()
+    odometro_inicial = float(input("Digite o valor inicial do odómetro (km): "))
 
-    for y in range(altura):
-        for x in range(largura):
-            r, g, b = imagem.getPixel(x, y)
-            brilho = int(round(0.299 * r + 0.587 * g + 0.114 * b))
-            imagem.setPixel(x, y, color_rgb(brilho, brilho, brilho))
-        update()  # Atualiza a imagem na tela após cada linha
+    print("Digite os dados de cada trajeto no formato: <odometro_final> <litros_consumidos>")
+    print("Pressione ENTER sem digitar nada para terminar.")
+
+    while True:
+        entrada = input("Trajeto: ")
+        if entrada.strip() == "":
+            break
+        try:
+            odometro_final, litros = map(float, entrada.strip().split())
+            trajetos.append((odometro_final, litros))
+        except ValueError:
+            print("Entrada inválida. Use o formato: <odometro_final> <litros_consumidos>")
+
+    return odometro_inicial, trajetos
+
+
+def calcular_consumo(odometro_inicial, trajetos):
+    total_km = 0
+    total_litros = 0
+
+    print("\nConsumo por trajeto:")
+    for odometro_final, litros in trajetos:
+        distancia = odometro_final - odometro_inicial
+        if distancia <= 0:
+            print("  Trajeto ignorado (distância inválida ou negativa).")
+            continue
+        consumo = (litros / distancia) * 100
+        print(f"  Distância: {distancia:.1f} km - Combustível: {litros:.1f} L - Consumo: {consumo:.2f} L/100km")
+
+        total_km += distancia
+        total_litros += litros
+        odometro_inicial = odometro_final
+
+    if total_km > 0:
+        consumo_total = (total_litros / total_km) * 100
+        print(f"\nConsumo médio total: {consumo_total:.2f} L/100km")
+    else:
+        print("Não foi possível calcular o consumo total (distância total zero).")
+
 
 def main():
-    # Solicita o nome do arquivo de imagem
-    nome_arquivo = input("Digite o nome da imagem (ex: exemplo.gif ou imagem.ppm): ")
+    odometro_inicial, trajetos = ler_dados_teclado()
+    calcular_consumo(odometro_inicial, trajetos)
 
-    # Cria uma imagem a partir do arquivo
-    imagem = Image(Point(0, 0), nome_arquivo)
-    largura = imagem.getWidth()
-    altura = imagem.getHeight()
 
-    # Cria uma janela do mesmo tamanho da imagem
-    win = GraphWin("Conversão para Tons de Cinza", largura, altura)
-    win.setCoords(0, 0, largura, altura)
-
-    # Move a imagem para o canto superior esquerdo
-    imagem.move(largura // 2, altura // 2)
-    imagem.draw(win)
-
-    print("Clique na imagem para convertê-la para tons de cinza.")
-    win.getMouse()
-
-    # Converte a imagem para tons de cinza
-    converter_para_cinza(imagem)
-
-    print("Imagem convertida.")
-    nome_saida = input("Digite o nome do novo arquivo para salvar a imagem em tons de cinza (ex: cinza.gif): ")
-
-    # Salva a imagem modificada
-    imagem.save(nome_saida)
-    print(f"Imagem salva como '{nome_saida}'.")
-
-    print("Clique na imagem para fechar a janela.")
-    win.getMouse()
-    win.close()
-
-main()
+if __name__ == "__main__":
+    main()
